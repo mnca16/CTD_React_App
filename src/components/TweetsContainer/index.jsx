@@ -5,17 +5,15 @@
 
 import { useState, useRef } from 'react';
 import { useFetch } from '../../hooks/useFetch';
+import { Button } from '../../ui/components';
 import { Tweet } from '../Tweet';
 import styles from './styles.module.css';
 
-export const TweetsContainer = (props) => {
-  // State
-  const [searchText, setSearchText] = useState('');
-
-  // Ref
+export const TweetsContainer = () => {
   const searchElement = useRef();
 
-  // Hooks
+  const [searchText, setSearchText] = useState('');
+
   const { response: tweets = [], loading } = useFetch(
     'http://localhost:3000/tweets'
   );
@@ -24,14 +22,15 @@ export const TweetsContainer = (props) => {
   // We also assign a default value to response in case nothing is returned
   // - In this case we assign response/tweets to an empty array
 
-  // Handlers
+  const filteredTweets = tweets.filter(
+    (post) =>
+      post.displayName.toLowerCase().includes(searchText.toLowerCase()) ||
+      post.content.toLowerCase().includes(searchText.toLowerCase())
+  );
+
   const handleUpdateSearchText = (event) => setSearchText(event.target.value);
   const handleClearSearchText = () => setSearchText('');
   const handleFocusOnSearchField = () => searchElement.current.focus();
-
-  const filteredTweets = tweets.filter((post) =>
-    post.displayName.toLowerCase().includes(searchText.toLowerCase())
-  );
 
   return (
     <>
@@ -45,8 +44,8 @@ export const TweetsContainer = (props) => {
             value={searchText}
             style={{ fontSize: 16, padding: 5 }}
           />
-          <button onClick={handleClearSearchText}>Clear</button>
-          <button onClick={handleFocusOnSearchField}>Focus Input</button>
+          <Button onClick={handleClearSearchText}>Clear</Button>
+          <Button onClick={handleFocusOnSearchField}>Focus Input</Button>
         </div>
         <div className={styles.tweetsContainerWrapper}>
           <div className={styles.tweetsContainer}>

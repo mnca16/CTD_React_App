@@ -8,72 +8,65 @@
 
 import React, { useState } from 'react';
 import { createUseStyles } from 'react-jss';
+import { Button } from '../../ui/components';
+import PropTypes from 'prop-types';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const useStyles = createUseStyles({
   root: {
     border: (props) =>
-      props.promoted ? '1px solid #feb500' : '1px solid #bbb',
+      props.promoted
+        ? `1px solid ${props.theme.promoted.outline}`
+        : `1px solid ${props.theme.container.outline}`,
     borderRadius: 5,
     padding: 20,
     marginBottom: 20,
-    backgroundColor: (props) => (props.promoted ? '#fff7e3' : '#fff'),
+    backgroundColor: (props) =>
+      props.promoted
+        ? props.theme.promoted.background
+        : props.theme.container.background,
     boxShadow: 'rgb(210 210 210) 0px 3px 6px 0px',
+    width: '100%',
   },
   username: {
     fontWeight: 'bold',
   },
-  tweeBody: {
+  tweetBody: {
     fontSize: 14,
     paddingLeft: 20,
-    borderLeft: '3px solid #0000001a',
-    color: '#000000a1',
+    borderLeft: (props) => `3px solid ${props.theme.translucent[10]}`,
+    color: (props) => props.theme.translucent[70],
   },
   likes: {
-    color: '#000000a1',
+    color: (props) => `3px solid ${props.theme.translucent[10]}`,
     fontSize: 12,
-  },
-  button: {
-    padding: 8,
-    fontSize: 12,
-    borderRadius: 3,
-    marginRight: 10,
-    background: 'none',
-    color: (props) => (props.liked ? '#ff4e4e' : '#3685ff'),
-    borderWidth: 1,
-    borderColor: (props) => (props.liked ? '#ff4e4e' : '#3685ff'),
-    '&:hover': {
-      backgroundColor: '#b5b5b51a',
-    },
   },
 });
 
-export function Tweet({ username, content, promoted }) {
-  // State
+function Tweet({ username, content, promoted = false }) {
+  const { theme } = useTheme();
+  const styles = useStyles({ theme, promoted });
+
   const [likes, setLikes] = useState(0);
 
-  // Hooks
-  const liked = Boolean(likes); // gives us a true or false if it is liked
-  const styles = useStyles({ promoted, liked });
-
-  // Handlers
   const handleAddLike = () => setLikes(likes + 1);
   const handleRemoveLike = () => setLikes(likes - 1);
 
   return (
     <div className={styles.root}>
       <span className={styles.username}>{username}</span>
-      <p className={styles.tweeBody}>{content}</p>
-      {likes === 0 && (
-        <button onClick={handleAddLike} className={styles.button}>
-          Like
-        </button>
-      )}
-      {likes > 0 && (
-        <button onClick={handleRemoveLike} className={styles.button}>
-          Remove Like
-        </button>
-      )}
+      <p className={styles.tweetBody}>{content}</p>
+      {likes === 0 && <Button onClick={handleAddLike}>Like</Button>}
+      {likes > 0 && <Button onClick={handleRemoveLike}>Remove Like</Button>}
       <span className={styles.likes}>{likes} Likes</span>
     </div>
   );
 }
+
+Tweet.propTypes = {
+  username: PropTypes.string.isRequired,
+  content: PropTypes.string.isRequired,
+  promoted: PropTypes.bool,
+};
+
+export { Tweet };

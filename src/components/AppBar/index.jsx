@@ -1,5 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { createUseStyles } from 'react-jss';
+import { useUser } from '../../contexts/UserContext';
+import { Button, IconButton } from '../../ui/components';
+import { Edit2 } from 'react-feather';
+import { LoginPopover, NewTweetPopover } from '../';
+import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 
 const useStyles = createUseStyles({
   root: {
@@ -19,18 +25,56 @@ const useStyles = createUseStyles({
   spacer: {
     height: 75,
   },
+  title: {
+    color: 'white',
+    textDecoration: 'none',
+  }
 });
 
-export function AppBar({ children, title }) {
+function AppBar({ title }) {
+  const { username } = useUser();
   const styles = useStyles();
+
+  const [isLoginPopoverOpen, setIsLoginPopoverOpen] = useState(false);
+  const [isNewTweetFormOpen, setIsNewTweetFormOpen] = useState(false);
+
+  const handleOpenLoginPopover = () => setIsLoginPopoverOpen(true);
+  const handleCloseLoginPopover = () => {
+    setIsLoginPopoverOpen(false);
+  };
+  const handleOpenTweetForm = () => setIsNewTweetFormOpen(true);
+  const handleCloseTweetForm = () => setIsNewTweetFormOpen(false);
+
+  //TODO remove inline styles
   return (
     <>
       <div className={styles.root}>
-        <span className={styles.title}>{title}</span>
-        {children}
+        <Link to="/">
+          <span className={styles.title}>{title}</span>
+        </Link>
+        <div style={{ display: 'flex' }}>
+          {!username && <Button onClick={handleOpenLoginPopover}>Login</Button>}
+          {username && (
+            <IconButton onClick={handleOpenTweetForm}>
+              <Edit2 />
+            </IconButton>
+          )}
+          {username && <Button variant="contained">{username}</Button>}
+        </div>
       </div>
       <div className={styles.spacer} />
-      {/* Ensures that content is never hidden under the app bar */}
+      {isLoginPopoverOpen && (
+        <LoginPopover handleClose={handleCloseLoginPopover} />
+      )}
+      {isNewTweetFormOpen && (
+        <NewTweetPopover handleClose={handleCloseTweetForm} />
+      )}
     </>
   );
 }
+
+AppBar.propTypes = {
+  title: PropTypes.string,
+};
+
+export { AppBar };
